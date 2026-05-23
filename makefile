@@ -7,8 +7,8 @@ all: main.o f.o
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c -o main.o
 
-f.o: removerng.s
-	nasm -f elf removerng.s -o f.o
+f.o: leavelastndig.s
+	nasm -f elf leavelastndig.s -o f.o
 
 clean:
 	rm -rf *.o
