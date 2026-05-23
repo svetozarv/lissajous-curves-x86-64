@@ -5,19 +5,21 @@
 
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
+    if (argc < 4) {
         printf("Error: Argument missing.\n");
-        printf("Usage: %s <string> <number>\n", argv[0]);
+        printf("Usage: %s <string> <char> <char>\n", argv[0]);
         return 1;
     }
 
-    int n = atoi(argv[2]);
-    if (n <= 0) {
-        printf("Invalid argument n.");
+    char a = *argv[2];
+    char b = *argv[3];
+    if (a == '\0' || b == '\0') {
+        printf("Invalid argument.");
         return 1;
     }
-
-    f(argv[1], n);
+    printf("%d\n", a);
+    printf("%d\n", b);
+    f(argv[1], a, b);
 
     printf("%s\n", argv[1]);
     return 0;
