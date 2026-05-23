@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     }
     printf("%d\n", a);
     printf("%d\n", b);
-    remrep(argv[1]);
+    reversepairs(argv[1]);
 
     printf("%s\n", argv[1]);
     return 0;
