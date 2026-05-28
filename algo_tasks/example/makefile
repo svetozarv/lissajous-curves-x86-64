@@ -7,8 +7,8 @@ all: main.o f.o
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c -o main.o
 
-f.o: reversepairs.s
-	nasm -f elf reversepairs.s -o f.o
+f.o: f.s
+	nasm -f elf f.s -o f.o
 
 clean:
 	rm -rf *.o

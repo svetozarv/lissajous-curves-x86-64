@@ -1,23 +1,27 @@
 #ifndef F_H_
 #define F_H_
 
-// Remove characters with codes from a to b, a < b.
+// [DONE] Remove characters with codes from a to b, a < b.
 void removerng(char *s, char a, char b);
 
-// Remove every n-th character
+// [DONE] Remove every n-th character
 void remnth(char *s, int n);
 
-// Leave last n digits, removing all other characters
+// [DONE]Leave last n digits, removing all other characters
 void leavelastndig(char *s, int n);
 
-// Remove repetitions of characters.
+// [DONE] Remove repetitions of characters.
 void remrep(char *s);
+
+// [DONE] Leave characters with codes from a to b, a < b.
+void leaverng(char *s, char a, char b);
+
+// [DONE] Swap characters in pairs.
+void reversepairs(char *s);
+
 
 // Leave only the longest sequence of decimal digits.
 void leavelongestnum(char *s, int n);
-
-// Leave characters with codes from a to b, a < b.
-void leaverng(char *s, char a, char b);
 
 // Remove the last sequence of decimal digits.
 void remlastnum(char *s);
@@ -33,9 +37,6 @@ void reversedig(char *s);
 
 // Reverse the order of letters, leaving the other characters in their places.
 void reverselet(char *s);
-
-// Swap characters in pairs.
-void reversepairs(char *s);
 
 // Replace each sequence of digits with a specified single character.
 void replnum(char *s, char a);

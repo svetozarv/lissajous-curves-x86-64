@@ -5,22 +5,12 @@
 
 
 int main(int argc, char* argv[]) {
-    if (argc < 4) {
+    if (argc < 2) {
         printf("Error: Argument missing.\n");
-        printf("Usage: %s <string> <char> <char>\n", argv[0]);
+        printf("Usage: %s <string>\n", argv[0]);
         return 1;
     }
-
-    char a = *argv[2];
-    char b = *argv[3];
-    if (a == '\0' || b == '\0') {
-        printf("Invalid argument.");
-        return 1;
-    }
-    printf("%d\n", a);
-    printf("%d\n", b);
-    reversepairs(argv[1]);
-
+    f(argv[1]);
     printf("%s\n", argv[1]);
     return 0;
 }
