@@ -1,8 +1,8 @@
 section .text
 
-global f
+global removerng
 
-f:
+removerng:
     ; --- prolog ---
     push ebp
     mov ebp, esp

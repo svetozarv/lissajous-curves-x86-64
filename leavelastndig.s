@@ -1,8 +1,8 @@
 section .text
 
-global f
+global leavelastndig
 
-f:
+leavelastndig:
     ; --- prolog ---
     push ebp
     mov ebp, esp

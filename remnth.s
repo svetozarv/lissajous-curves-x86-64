@@ -1,8 +1,8 @@
 section .text
 
-global f
+global remnth
 
-f:
+remnth:
     ; --- prolog ---
     push ebp
     mov ebp, esp
