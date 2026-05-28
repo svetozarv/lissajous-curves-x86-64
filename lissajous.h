@@ -1,7 +1,6 @@
 #ifndef LISSAJOUS_H
 #define LISSAJOUS_H
 
-
 #define WIDTH 800
 #define HEIGHT 600
 

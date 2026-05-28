@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-m32 -Wall
+CFLAGS= -Wall -lSDL2
 
 all: lissajous
 
@@ -7,10 +7,10 @@ lissajous: main.o lissajous.o
 	$(CC) $(CFLAGS) main.o lissajous.o -o lissajous
 
 main.o: main.c
-	$(CC) $(CFLAGS) -c main.c -o main.o
+	$(CC) $(CFLAGS) -c main.c
 
 lissajous.o: lissajous.s
-	nasm -f elf lissajous.s -o lissajous.o
+	nasm -f elf64 lissajous.s
 
 clean:
 	rm -rf *.o
