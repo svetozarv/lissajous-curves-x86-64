@@ -1,4 +1,5 @@
 ; move all the digits to the end of string
+; [draft]
 section .text
 
 global bubbleupdigits

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "f.h"
-
+#include "../../f.h"
 
 
 int main(int argc, char* argv[]) {
@@ -14,13 +13,13 @@ int main(int argc, char* argv[]) {
     char a = *argv[2];
     char b = *argv[3];
     if (a == '\0' || b == '\0') {
-        printf("Invalid argument.");
+        printf("Provide argv[2] and argv[3].");
         return 1;
     }
-    printf("%d\n", a);
-    printf("%d\n", b);
-    reversepairs(argv[1]);
-    leavelastndig(argv[1]);
+    printf("a = %d\n", a);
+    printf("b = %d\n", b);
+
+    leaverng(argv[1], a, b);
 
     printf("%s\n", argv[1]);
     return 0;
