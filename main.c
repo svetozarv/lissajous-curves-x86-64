@@ -12,7 +12,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-
     SDL_Window* window = NULL;
     window = SDL_CreateWindow("Lissajous Curves", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL) {
@@ -20,23 +19,18 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // SDL_Surface* screenSurface = NULL;    // image
-    // screenSurface = SDL_GetWindowSurface( window );
-
     SDL_Renderer *renderer = NULL;
     renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
 
     SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
 
     uint32_t *pixelBuffer = (uint32_t*) malloc( WIDTH * HEIGHT * sizeof(uint32_t) );
-    double A = 300.0, B = 200.0;
-    double a = 3.0, b = 2.0;
-    double delta = 0.5;
+    float A = 300.0, B = 200.0;
+    float a = 3.0, b = 2.0;
+    float delta = 0.0;
     int test_index = 300 * WIDTH + 400;
+    int test_color = 0xF00000;
 
-    // Fill the surface white
-    // SDL_FillRect(screenSurface, NULL, SDL_MapRGB( screenSurface->format, 255, 255, 255 ));
-    // SDL_UpdateWindowSurface( window );
     SDL_Event e;
     bool quit = false;
 
@@ -58,13 +52,18 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+        printf("a: %.2f, b: %.2f, A: %.2f, B: %.2f\n", a, b, A, B);
 
-        // memset(pixelBuffer, 0, WIDTH * HEIGHT * sizeof(uint32_t));
+        memset(pixelBuffer, 0, WIDTH * HEIGHT * sizeof(uint32_t));
         // ==============
-        // drawLissajous(WIDTH, HEIGHT, A, B, a, b, delta);
+        lissajous(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta);
+        delta += 0.01; // Animate the curve by changing delta over time
+        if (delta >= 6.28) delta = 0;
         // ==============
-        pixelBuffer[test_index] = 0x00FF00;
-        ++test_index;
+        // pixelBuffer[test_index] = test_color;
+        // ++test_index;
+        // test_color += 5;
+        // ==============
 
         SDL_UpdateTexture(texture, NULL, pixelBuffer, WIDTH * sizeof(uint32_t));
         SDL_RenderClear(renderer);
@@ -73,6 +72,7 @@ int main(int argc, char* argv[]) {
     }
 
 
+    SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
