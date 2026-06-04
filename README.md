@@ -3,7 +3,7 @@ The project is a hybrid program.
 
 Features:
 - uses SDL2 graphics library
-- SSE/AVX for floating point calculations
+- SSE for single-precision floating point calculations
 - Unix system V x86-64 ABI (https://gitlab.com/x86-psABIs/x86-64-ABI)
 
 Requirements:
