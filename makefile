@@ -1,10 +1,10 @@
 CC=gcc
-CFLAGS= -Wall -lSDL2
+CFLAGS= -Wall
 
 all: lissajous
 
 lissajous: main.o lissajous.o
-	$(CC) $(CFLAGS) main.o lissajous.o -o lissajous
+	$(CC) $(CFLAGS) -z noexecstack main.o lissajous.o -o lissajous -lSDL2
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
