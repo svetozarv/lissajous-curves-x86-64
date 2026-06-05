@@ -1,16 +1,15 @@
 section .data
     align 16
     start:      dd 0.0, 0.001, 0.002, 0.003
-    align 16
     start2:     dd 0.004, 0.005, 0.006, 0.007
-    align 16
     step_4x:    dd 0.004, 0.004, 0.004, 0.004
+    half:       dd 0.5, 0.5, 0.5, 0.5
+    inv_2pi:    dd 0.15915494, 0.15915494, 0.15915494, 0.15915494 ; 1 / (2*PI)
+    two_pi:     dd 6.28318530, 6.28318530, 6.28318530, 6.28318530 ; 2*PI
+
     align 16
     three_fac:  dd 6.0
-    align 16
     five_fac:   dd 120.0
-    align 16
-    half:       dd 0.5, 0.5, 0.5, 0.5
 
 section .text
 DEFAULT REL
@@ -48,6 +47,12 @@ mainloop:
     ; ====== compute x(t) ======
     mulps xmm5, xmm2                     ; xmm5 = [ a*t3 | a*t2 | a*t1 | a*t0 ]
     addps xmm5, xmm4                     ; xmm5 = [ a*t3+delta | a*t2+delta | a*t1+delta | a*t0+delta ]
+    ; normalize sine
+    movaps xmm7, xmm5
+    mulps  xmm7, [inv_2pi]
+    roundps xmm7, xmm7, 0x00
+    mulps xmm7, [two_pi]
+    subps xmm5, xmm7
 
     ; compute sine
     movaps xmm7, xmm5                    ; a*t+delta
@@ -67,6 +72,13 @@ mainloop:
 
     ; ====== compute y(t) ======
     mulps xmm6, xmm3                     ; xmm6 = [ b*t3 | b*t2 | b*t1 | b*t0 ]
+
+    ; normalize sine
+    movaps xmm7, xmm6
+    mulps  xmm7, [inv_2pi]
+    roundps xmm7, xmm7, 0x00
+    mulps xmm7, [two_pi]
+    subps xmm6, xmm7
 
     ; compute sine
     movaps xmm7, xmm6                    ; b*t
