@@ -10,6 +10,7 @@ section .data
     align 16
     five_fac:   dd 120.0
     align 16
+    half:       dd 0.5, 0.5, 0.5, 0.5
 
 section .text
 DEFAULT REL
@@ -32,6 +33,14 @@ lissajous:
     movaps xmm6, xmm5                   ; xmm6 <- [ t3 | t2 | t1 | t0 ] = [ y3 | y2 | y1 | y0 ]
     movaps xmm15, xmm5                  ; xmm15 <- [ curr_t | curr_t | curr_t | curr_t ] = [ t3 | t2 | t1 | t0 ]
     movaps xmm14, [step_4x]             ; xmm14 <- [ 0.004 | 0.004 | 0.004 | 0.004 ]
+
+    cvtsi2ss xmm9, esi                 ; xmm9 = [ 0 | 0 | 0 | Width ]
+    shufps xmm9, xmm9, 0x00            ; [ Width | Width | Width | Width ]
+    mulps xmm9, [half]                 ; xmm14 = [ 0.5*Width | 0.5*Width | 0.5*Width | 0.5*Width ]
+
+    cvtsi2ss xmm10, edx                 ; xmm15 = [ 0 | 0 | 0 | Height ]
+    shufps   xmm10, xmm10, 0x00         ; [ Height | Height | Height | Height ]
+    mulps    xmm10, [half]              ; xmm15 = [ 0.5*Height | 0.5*Height | 0.5*Height | 0.5*Height ]
 
 mainloop:
     test rcx, rcx
@@ -74,48 +83,39 @@ mainloop:
 
     mulps xmm6, xmm1                    ; xmm6 = [ B*sin(b*t3) | B*sin(b*t2) | B*sin(b*t1) | B*sin(b*t0) ]
 
+    addps xmm5, xmm9                     ; x = A*sin(a*t+delta) + 0.5*Width
+    addps xmm6, xmm10                    ; y = B*sin(b*t) + 0.5*Height
+
     ; ====== draw points ======
     cvttps2dq xmm5, xmm5                ; convert x to int
     cvttps2dq xmm6, xmm6                ; convert y to int
     pextrd r8d, xmm5, 0                 ; r8d = x0
     pextrd r9d, xmm6, 0                 ; r9d = y0
-    sal r8d, 2
-    sal r9d, 2                          ; ORDER influence on overflow??
-    imul r9d, esi
-    mov r10d, edi
-    add r10d, r8d
-    add r10d, r9d
-    mov dword [r10d], 0xFFFFFF              ; set pixel (x0, y0) to white
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF   ; set pixel (x0, y0) to white
 
     pextrd r8d, xmm5, 1                 ; r8d = x1
     pextrd r9d, xmm6, 1                 ; r9d = y1
-    sal r8d, 2
-    sal r9d, 2                          ; ORDER influence on overflow??
-    imul r9d, esi
-    mov r10d, edi
-    add r10d, r8d
-    add r10d, r9d
-    mov dword [r10d], 0xFFFFFF              ; set pixel (x0, y0) to white
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF   ; set pixel (x0, y0) to white
 
     pextrd r8d, xmm5, 2                 ; r8d = x2
     pextrd r9d, xmm6, 2                 ; r9d = y2
-    sal r8d, 2
-    sal r9d, 2                          ; ORDER influence on overflow??
-    imul r9d, esi
-    mov r10d, edi
-    add r10d, r8d
-    add r10d, r9d
-    mov dword [r10d], 0xFFFFFF              ; set pixel (x0, y0) to white
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF   ; set pixel (x0, y0) to white
 
     pextrd r8d, xmm5, 3                 ; r8d = x3
     pextrd r9d, xmm6, 3                 ; r9d = y3
-    sal r8d, 2
-    sal r9d, 2                          ; ORDER influence on overflow??
-    imul r9d, esi
-    mov r10d, edi
-    add r10d, r8d
-    add r10d, r9d
-    mov dword [r10d], 0xFF              ; set pixel (x0, y0) to white
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF   ; set pixel (x0, y0) to white
 
 
     ; ====== update t ======

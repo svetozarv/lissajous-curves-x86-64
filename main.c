@@ -52,13 +52,17 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+        if (A >= WIDTH/2) A = WIDTH/2 - 1;
+        if (B >= HEIGHT/2) B = HEIGHT/2 - 1;
         printf("a: %.2f, b: %.2f, A: %.2f, B: %.2f\n", a, b, A, B);
 
         memset(pixelBuffer, 0, WIDTH * HEIGHT * sizeof(uint32_t));
         // ==============
-        lissajous(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta);
         delta += 0.01; // Animate the curve by changing delta over time
         if (delta >= 6.28) delta = 0;
+
+        lissajous(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta);
+
         // ==============
         // pixelBuffer[test_index] = test_color;
         // ++test_index;
