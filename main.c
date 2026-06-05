@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "lissajous.h"
-#include <math.h>
 
-#define M_2xPI 2*M_PI
+#define M_PI    3.14159265358979323846	/* pi */
+#define M_2xPI  2*M_PI
 
 
 int main(int argc, char* argv[]) {
@@ -28,8 +28,8 @@ int main(int argc, char* argv[]) {
     SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
 
     uint32_t *pixelBuffer = (uint32_t*) malloc( WIDTH * HEIGHT * sizeof(uint32_t) );
-    float A = 150.0, B = 150.0;
-    float a = 1.0, b = 2.0;
+    float A = 200.0, B = 200.0;
+    float a = 2.0, b = 3.0;
     float delta = 0.0;
     // int test_index = 300 * WIDTH + 400;
     // int test_color = 0xF00000;
@@ -48,10 +48,18 @@ int main(int argc, char* argv[]) {
                     case SDLK_DOWN:  a -= 0.1; break;
                     case SDLK_RIGHT: b += 0.1; break;
                     case SDLK_LEFT:  b -= 0.1; break;
-                    case SDLK_w:     A += 0.1; break;
-                    case SDLK_s:     A -= 0.1; break;
-                    case SDLK_d:     B += 0.1; break;
-                    case SDLK_a:     B -= 0.1; break;
+                    case SDLK_w:     A += 1; break;
+                    case SDLK_s:     A -= 1; break;
+                    case SDLK_d:     B += 1; break;
+                    case SDLK_a:     B -= 1; break;
+                    case SDLK_SPACE:
+                        A = 200.0, B = 200.0;
+                        a = 1.0, b = 1.0;
+                        break;
+                    case SDLK_RALT:
+                        A = 200.0, B = 200.0;
+                        a = 1.0, b = 110.0;
+                        break;
                 }
             }
         }
