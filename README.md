@@ -13,7 +13,7 @@ It's split in two main parts:
 It computes the coordinates (x, y) for every `dt = 0.00025` in `[0.0, 1.0]` using the sine function approximated by a 9th degree [minimax polynomial](https://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html), which coefficients were computed* using the [Remez algorithm](https://www.boost.org/doc/libs/latest/libs/math/doc/html/math_toolkit/remez.html) and uses the SSE vector instructions, instead of x87 FPU, for performing 4 single-precision floating point calculations simultaneously to achieve better performance (which can be improved even more by using AVX/AVX-512).
 
 The program is designed to run on Linux operating systems and follows the [Unix System V x86-64 ABI](https://gitlab.com/x86-psABIs/x86-64-ABI) for compatibility.
-This project demonstrates how to combine low-level assembly programming with high-level graphics rendering to create visually appealing results.
+This project demonstrates how to combine low-level assembly programming with high-level graphics rendering to create visually appealing results and has taught me that every line of code has it's own enormous side effects, even if it's just a simple `mov` instruction, that the x86-64 architecture is a (really) complex beast with many intricacies to consider when writing assembly code, and last but not least, that approximating functions with Taylor series can sometimes be a really bad idea.
 
 
 #### Requirements:
