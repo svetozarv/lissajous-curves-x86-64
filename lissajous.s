@@ -1,11 +1,9 @@
 section .data
     align 16
-    start:      dd 0.0, 0.001, 0.002, 0.003
-    start2:     dd -1.0, -0.999, -0.998, -0.997
-    step_4x:    dd 0.004, 0.004, 0.004, 0.004
+    start:      dd 0.0, 0.00025, 0.0005, 0.00075
+    step_4x:    dd 0.001, 0.001, 0.001, 0.001
     half:       dd 0.5, 0.5, 0.5, 0.5
 
-    align 16
     c1: dd 6.28318516, 6.28318516, 6.28318516, 6.28318516
     c3: dd -41.3416550, -41.3416550, -41.3416550, -41.3416550
     c5: dd 81.6010041, 81.6010041, 81.6010041, 81.6010041
@@ -21,7 +19,7 @@ lissajous:
     push rbp
     mov rbp, rsp
     ; --- prolog ---
-    mov rcx, 250                            ; rcx <- iterations (t <= 1.0 - one rotation = 250 iter)
+    mov rcx, 1000                            ; rcx <- iterations (t <= 1.0 - one rotation = 250 iter) (DO NOT CHANGE)
 
     shufps xmm0, xmm0, 0x00                 ; xmm0 = [ A | A | A | A ]
     shufps xmm1, xmm1, 0x00                 ; xmm1 = [ B | B | B | B ]
