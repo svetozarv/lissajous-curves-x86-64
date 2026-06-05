@@ -8,8 +8,8 @@ section .data
     two_pi:     dd 6.28318530, 6.28318530, 6.28318530, 6.28318530 ; 2*PI
 
     align 16
-    three_fac:  dd 6.0
-    five_fac:   dd 120.0
+    three_fac_inv:  dd 0.1666666
+    five_fac_inv:   dd 0.0083333
 
 section .text
 DEFAULT REL
@@ -61,8 +61,8 @@ mainloop:
     movaps xmm8, xmm7                    ; save ^3
     mulps xmm8, xmm5                     ; (b*t)^4
     mulps xmm8, xmm5                     ; (b*t)^5
-    divps xmm7, [three_fac]              ; (b*t)^3 / 6
-    divps xmm8, [five_fac]               ; (b*t)^5 / 120
+    mulps xmm7, [three_fac_inv]          ; (b*t)^3 * 1/6
+    mulps xmm8, [five_fac_inv]           ; (b*t)^5 * 1/120
     subps xmm5, xmm7
     addps xmm5, xmm8
     ; xmm5 = [ sin(a*t3+delta) | sin(a*t2+delta) | sin(a*t1+delta) | sin(a*t0+delta) ]
@@ -87,8 +87,8 @@ mainloop:
     movaps xmm8, xmm7                    ; save ^3
     mulps xmm8, xmm6                     ; (b*t)^4
     mulps xmm8, xmm6                     ; (b*t)^5
-    divps xmm7, [three_fac]              ; (b*t)^3 / 6
-    divps xmm8, [five_fac]               ; (b*t)^5 / 120
+    mulps xmm7, [three_fac_inv]          ; (b*t)^3 * 1/6
+    mulps xmm8, [five_fac_inv]           ; (b*t)^5 * 1/120
     subps xmm6, xmm7
     addps xmm6, xmm8
     ; xmm6 = [ sin(b*t3) | sin(b*t2) | sin(b*t1) | sin(b*t0) ]
