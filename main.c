@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "lissajous.h"
+#include <math.h>
+
+#define M_2xPI 2*M_PI
 
 
 int main(int argc, char* argv[]) {
@@ -25,11 +28,11 @@ int main(int argc, char* argv[]) {
     SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
 
     uint32_t *pixelBuffer = (uint32_t*) malloc( WIDTH * HEIGHT * sizeof(uint32_t) );
-    float A = 300.0, B = 200.0;
-    float a = 3.0, b = 2.0;
+    float A = 150.0, B = 150.0;
+    float a = 1.0, b = 2.0;
     float delta = 0.0;
-    int test_index = 300 * WIDTH + 400;
-    int test_color = 0xF00000;
+    // int test_index = 300 * WIDTH + 400;
+    // int test_color = 0xF00000;
 
     SDL_Event e;
     bool quit = false;
@@ -54,14 +57,14 @@ int main(int argc, char* argv[]) {
         }
         if (A >= WIDTH/2) A = WIDTH/2 - 1;
         if (B >= HEIGHT/2) B = HEIGHT/2 - 1;
-        printf("a: %.2f, b: %.2f, A: %.2f, B: %.2f\n", a, b, A, B);
+        printf("a: %.2f, b: %.2f, A: %.2f, B: %.2f\r", a, b, A, B);
 
         memset(pixelBuffer, 0, WIDTH * HEIGHT * sizeof(uint32_t));
         // ==============
-        delta += 0.01; // Animate the curve by changing delta over time
-        if (delta >= 6.28) delta = 0;
+        delta += 0.001; // Animate the curve by changing delta over time
+        if (delta >= M_2xPI) delta = 0;
 
-        lissajous(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta);
+        lissajous(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta / (2.0f * M_PI));
 
         // ==============
         // pixelBuffer[test_index] = test_color;
