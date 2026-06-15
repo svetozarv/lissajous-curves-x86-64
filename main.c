@@ -1,14 +1,18 @@
 #include <SDL2/SDL.h>
+#include <bits/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "lissajous.h"
+#include <time.h>
 
 #define M_PI    3.14159265358979323846	/* pi */
 #define M_2xPI  2*M_PI
 
-
+// TODO: move to Raylib
+// TODO: add sliders
+// TODO: add function resp. for displaying info in console and print everything
 int main(int argc, char* argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
@@ -37,6 +41,9 @@ int main(int argc, char* argv[]) {
     SDL_Event e;
     bool quit = false;
 
+    // for benchmarking
+    struct timespec start, end;
+
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -48,10 +55,10 @@ int main(int argc, char* argv[]) {
                     case SDLK_DOWN:  a -= 0.1; break;
                     case SDLK_RIGHT: b += 0.1; break;
                     case SDLK_LEFT:  b -= 0.1; break;
-                    case SDLK_w:     A += 1; break;
-                    case SDLK_s:     A -= 1; break;
-                    case SDLK_d:     B += 1; break;
-                    case SDLK_a:     B -= 1; break;
+                    case SDLK_w:     A += 1;   break;
+                    case SDLK_s:     A -= 1;   break;
+                    case SDLK_d:     B += 1;   break;
+                    case SDLK_a:     B -= 1;   break;
                     case SDLK_SPACE:
                         A = 200.0, B = 200.0;
                         a = 1.0, b = 1.0;
@@ -63,22 +70,24 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        if (A >= WIDTH/2) A = WIDTH/2 - 1;
-        if (B >= HEIGHT/2) B = HEIGHT/2 - 1;
-        printf("a: %.2f, b: %.2f, A: %.2f, B: %.2f\r", a, b, A, B);
+        if (A >= WIDTH / 2.0) A = WIDTH / 2.0 - 1;
+        if (A <= -WIDTH / 2.0) A = -WIDTH / 2.0 + 1;
+        if (B >= HEIGHT / 2.0) B = HEIGHT / 2.0 - 1;
+        if (B <= -HEIGHT / 2.0) B = -HEIGHT / 2.0 + 1;
 
         memset(pixelBuffer, 0, WIDTH * HEIGHT * sizeof(uint32_t));
         // ==============
-        delta += 0.001; // Animate the curve by changing delta over time
+        delta += 0.00075; // Animate the curve by changing delta over time (affects speed)
         if (delta >= M_2xPI) delta = 0;
 
-        lissajous(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta / (2.0f * M_PI));
 
-        // ==============
-        // pixelBuffer[test_index] = test_color;
-        // ++test_index;
-        // test_color += 5;
-        // ==============
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        lissajous(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta / (2.0f * M_PI));
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        double lissajous_duration = end.tv_nsec - start.tv_nsec;
+
+        printf("a: %.2f, b: %.2f, A: %.2f, B: %.2f, delta: %.4f, lissajous_time: %.4fµs  $$$\r",
+               a, b, A, B, delta, lissajous_duration / 1000.0);
 
         SDL_UpdateTexture(texture, NULL, pixelBuffer, WIDTH * sizeof(uint32_t));
         SDL_RenderClear(renderer);
