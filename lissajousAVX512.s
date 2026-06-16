@@ -1,3 +1,17 @@
+; Lissajous curve generator, AVX-512 version
+
+%macro WRITE_PIXEL_IN_BUFFER 3
+; %1 - ymm register containing x coordinates
+; %2 - ymm register containing y coordinates
+; %3 the desired pixel index in the current ymm register (0, 1, 2, or 3)
+    vpextrd r8d, %1, %3                  ; r8d = x5
+    vpextrd r9d, %2, %3                   ; r9d = y5
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF
+%endmacro
+
 section .data
     align 32
     start:      dd 0.00000,  0.00025, 0.00050, 0.00075, 0.00100, 0.00125, 0.00150, 0.00175, 0.00200, 0.00225, 0.00250, 0.00275, 0.00300, 0.00325, 0.00350, 0.00375
@@ -103,143 +117,37 @@ mainloop:
     ; ================== draw points ==================
     vcvttps2dq zmm5, zmm5                    ; convert x to int
     vcvttps2dq zmm6, zmm6                    ; convert y to int
-    vpextrd r8d, xmm5, 0                     ; r8d = x0
-    vpextrd r9d, xmm6, 0                     ; r9d = y0
-    mov eax, r9d                            ; y
-    imul eax, esi                           ; y*width
-    add eax, r8d                            ; y*width + x
-    mov dword [rdi + 4*rax], 0xFFFFFFFF     ; set pixel (x0, y0) to white
-
-    vpextrd r8d, xmm5, 1                     ; r8d = x1
-    vpextrd r9d, xmm6, 1                     ; r9d = y1
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF     ; set pixel (x0, y0) to white
-
-    vpextrd r8d, xmm5, 2                     ; r8d = x2
-    vpextrd r9d, xmm6, 2                     ; r9d = y2
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF     ; set pixel (x0, y0) to white
-
-    vpextrd r8d, xmm5, 3                     ; r8d = x3
-    vpextrd r9d, xmm6, 3                     ; r9d = y3
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF     ; set pixel (x0, y0) to white
+    WRITE_PIXEL_IN_BUFFER xmm5, xmm6, 0
+    WRITE_PIXEL_IN_BUFFER xmm5, xmm6, 1
+    WRITE_PIXEL_IN_BUFFER xmm5, xmm6, 2
+    WRITE_PIXEL_IN_BUFFER xmm5, xmm6, 3
 
     vextractf32x4 xmm12, zmm5, 1             ; xmm11 = [ x7 | x6 | x5 | x4 ]
     vextractf32x4 xmm12, zmm6, 1             ; xmm12 = [ y7 | y6 | y5 | y4 ]
 
-    ; 5 pixel
-    vpextrd r8d, xmm11, 0                   ; r8d = x4
-    vpextrd r9d, xmm12, 0                   ; r9d = y4
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 6 pixel
-    vpextrd r8d, xmm11, 1                   ; r8d = x5
-    vpextrd r9d, xmm12, 1                   ; r9d = y5
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 7 pixel
-    vpextrd r8d, xmm11, 2                   ; r8d = x6
-    vpextrd r9d, xmm12, 2                   ; r9d = y6
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 8 pixel
-    vpextrd r8d, xmm11, 3                   ; r8d = x7
-    vpextrd r9d, xmm12, 3                   ; r9d = y7
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 0
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 1
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 2
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 3
 
     vextractf32x4 xmm12, zmm5, 2             ; xmm11 = [ x7 | x6 | x5 | x4 ]
     vextractf32x4 xmm12, zmm6, 2             ; xmm12 = [ y7 | y6 | y5 | y4 ]
 
-    ; 9 pixel
-    vpextrd r8d, xmm11, 0                   ; r8d = x4
-    vpextrd r9d, xmm12, 0                   ; r9d = y4
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 10 pixel
-    vpextrd r8d, xmm11, 1                   ; r8d = x5
-    vpextrd r9d, xmm12, 1                   ; r9d = y5
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 11 pixel
-    vpextrd r8d, xmm11, 2                   ; r8d = x6
-    vpextrd r9d, xmm12, 2                   ; r9d = y6
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 12 pixel
-    vpextrd r8d, xmm11, 3                   ; r8d = x7
-    vpextrd r9d, xmm12, 3                   ; r9d = y7
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 0
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 1
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 2
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 3
 
     vextractf32x4 xmm12, zmm5, 3             ; xmm11 = [ x7 | x6 | x5 | x4 ]
     vextractf32x4 xmm12, zmm6, 3             ; xmm12 = [ y7 | y6 | y5 | y4 ]
 
-    ; 13 pixel
-    vpextrd r8d, xmm11, 0                   ; r8d = x4
-    vpextrd r9d, xmm12, 0                   ; r9d = y4
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 14 pixel
-    vpextrd r8d, xmm11, 1                   ; r8d = x5
-    vpextrd r9d, xmm12, 1                   ; r9d = y5
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 15 pixel
-    vpextrd r8d, xmm11, 2                   ; r8d = x6
-    vpextrd r9d, xmm12, 2                   ; r9d = y6
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
-    ; 16 pixel
-    vpextrd r8d, xmm11, 3                   ; r8d = x7
-    vpextrd r9d, xmm12, 3                   ; r9d = y7
-    mov eax, r9d
-    imul eax, esi
-    add eax, r8d
-    mov dword [rdi + 4*rax], 0xFFFFFFFF
-
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 0
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 1
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 2
+    WRITE_PIXEL_IN_BUFFER xmm11, xmm12, 3
 
     ; ====== update t ======
-    vaddps ymm15, ymm15, ymm14                      ; t += 0.004
+    vaddps ymm15, ymm15, ymm14               ; t += dt
     vmovaps ymm5, ymm15                      ; current t
     vmovaps ymm6, ymm15                      ; current t
 
