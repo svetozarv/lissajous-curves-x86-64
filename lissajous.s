@@ -1,14 +1,15 @@
 section .data
     align 16
-    start:      dd 0.0, 0.00025, 0.0005, 0.00075
-    step_4x:    dd 0.001, 0.001, 0.001, 0.001
-    half:       dd 0.5, 0.5, 0.5, 0.5
+    start:      dd 0.00000, 0.00025, 0.00050, 0.00075
+    step_4x:    dd 0.00100, 0.00100, 0.00100, 0.00100   ; step = start[-1] - start[0]
+    half:       dd 0.5,     0.5,     0.5,     0.5
 
-    c1: dd 6.28318516, 6.28318516, 6.28318516, 6.28318516
+    ; minimax polynomial (sine approximation) coefficients
+    c1: dd  6.28318516,  6.28318516,  6.28318516,  6.28318516
     c3: dd -41.3416550, -41.3416550, -41.3416550, -41.3416550
-    c5: dd 81.6010041, 81.6010041, 81.6010041, 81.6010041
+    c5: dd  81.6010041,  81.6010041,  81.6010041,  81.6010041
     c7: dd -76.5497823, -76.5497823, -76.5497823, -76.5497823
-    c9: dd 39.5367060, 39.5367060, 39.5367060, 39.5367060
+    c9: dd  39.5367060,  39.5367060,  39.5367060,  39.5367060
 
 section .text
 DEFAULT REL
@@ -19,7 +20,7 @@ lissajous:
     push rbp
     mov rbp, rsp
     ; --- prolog ---
-    mov rcx, 1000                            ; rcx <- iterations (t <= 1.0 - one rotation = 250 iter) (DO NOT CHANGE)
+    mov rcx, 1000                            ; rcx <- iterations (t = 1.0 <- one rotation; 1 / step_4x = 1000 iters) (DO NOT CHANGE)
 
     shufps xmm0, xmm0, 0x00                 ; xmm0 = [ A | A | A | A ]
     shufps xmm1, xmm1, 0x00                 ; xmm1 = [ B | B | B | B ]
@@ -41,8 +42,6 @@ lissajous:
     mulps    xmm10, [half]                  ; xmm15 = [ 0.5*Height | 0.5*Height | 0.5*Height | 0.5*Height ]
 
 mainloop:
-    test rcx, rcx
-    jz end
     ; ====== compute x(t) ======
     mulps xmm5, xmm2                        ; xmm5 = [ a*t3 | a*t2 | a*t1 | a*t0 ]
     addps xmm5, xmm4                        ; xmm5 = [ a*t3+delta | a*t2+delta | a*t1+delta | a*t0+delta ]
