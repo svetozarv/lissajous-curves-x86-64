@@ -1,11 +1,37 @@
 ; Lissajous curve generator, AVX-512 version
+; Before running, make sure your CPU supports AVX-512 and it is enabled:
+;       grep -o 'avx512f' /proc/cpuinfo | head -n 1
+;
+; NOTE: On some Intel CPUs (such as 12th, 13th, or 14th Gen chips),
+;    AVX-512 is natively disabled unless you manually deactivate the efficiency cores (E-cores) in the BIOS
+;
+
+%macro V_COMPUTE_SINE 1
+; %1 - zmm register containing the input values (x)
+; uses zmm7, zmm8 as temporary registers
+; results are stored in %1
+    vmovaps zmm7, %1            ; x = ymm5
+    vmulps zmm7, zmm7, zmm7       ; x^2 = ymm7
+    vmovaps zmm8, [c9]
+    vmulps zmm8, zmm8, zmm7
+    vaddps zmm8, zmm8, [c7]
+    vmulps zmm8, zmm8, zmm7
+    vaddps zmm8, zmm8, [c5]
+    vmulps zmm8, zmm8, zmm7
+    vaddps zmm8, zmm8, [c3]
+    vmulps zmm8, zmm8, zmm7
+    vaddps zmm8, zmm8, [c1]
+    vmulps zmm8, zmm8, %1
+    vmovaps %1, zmm8
+%endmacro
 
 %macro WRITE_PIXEL_IN_BUFFER 3
-; %1 - ymm register containing x coordinates
-; %2 - ymm register containing y coordinates
-; %3 the desired pixel index in the current ymm register (0, 1, 2, or 3)
+; %1 - xmm register containing x coordinates
+; %2 - xmm register containing y coordinates
+; %3 the desired pixel index in the current xmm register (0, 1, 2, or 3)
+; uses r8d, r9d, eax
     vpextrd r8d, %1, %3                  ; r8d = x5
-    vpextrd r9d, %2, %3                   ; r9d = y5
+    vpextrd r9d, %2, %3                  ; r9d = y5
     mov eax, r9d
     imul eax, esi
     add eax, r8d
@@ -63,52 +89,22 @@ mainloop:
 
     ; normalize z := a*t+delta for sine
     vmovaps zmm7, zmm5
-    vroundps zmm7, zmm7, 0x00
+    vrndscaleps zmm7, zmm7, 0x00
     vsubps zmm5, zmm5, zmm7
 
-    ; compute sine
-    vmovaps zmm7, zmm5                       ; x = ymm5
-    vmulps zmm7, zmm7, zmm7                        ; x^2 = ymm7
-    vmovaps zmm8, [c9]
-    vmulps zmm8, zmm8, zmm7
-    vaddps zmm8, zmm8, [c7]
-    vmulps zmm8, zmm8, zmm7
-    vaddps zmm8, zmm8, [c5]
-    vmulps zmm8, zmm8, zmm7
-    vaddps zmm8, zmm8, [c3]
-    vmulps zmm8, zmm8, zmm7
-    vaddps zmm8, zmm8, [c1]
-    vmulps zmm8, zmm8, zmm5
-    vmovaps zmm5, zmm8
-    ; ymm5 = [ sin(a*t3+delta) | sin(a*t2+delta) | sin(a*t1+delta) | sin(a*t0+delta) ]
 
+    V_COMPUTE_SINE zmm5                            ; ymm5 = [ sin(a*t3+delta) | sin(a*t2+delta) | sin(a*t1+delta) | sin(a*t0+delta) ]
     vmulps zmm5, zmm5, zmm0                        ; ymm5 = [ A*sin(a*t3+delta) | A*sin(a*t2+delta) | A*sin(a*t1+delta) | A*sin(a*t0+delta) ]
-
 
     ; ================== compute y(t) ==================
     vmulps zmm6, zmm6, zmm3                        ; ymm6 = [ b*t3 | b*t2 | b*t1 | b*t0 ]
 
     ; normalize z := b*t for sine
     vmovaps zmm7, zmm6
-    vroundps zmm7, zmm7, 0x00
+    vrndscaleps zmm7, zmm7, 0x00                   ; Round Scale Packed Single-Precision Floating-Point Values
     vsubps zmm6, zmm6, zmm7
 
-    ; compute sine
-    vmovaps zmm7, zmm6                       ; y = ymm6
-    vmulps zmm7, zmm7, zmm7                        ; y^2 = ymm7
-    vmovaps zmm8, [c9]
-    vmulps zmm8, zmm8, zmm7
-    vaddps zmm8, zmm8, [c7]
-    vmulps zmm8, zmm8, zmm7
-    vaddps zmm8, zmm8, [c5]
-    vmulps zmm8, zmm8, zmm7
-    vaddps zmm8, zmm8, [c3]
-    vmulps zmm8, zmm8, zmm7
-    vaddps zmm8, zmm8, [c1]
-    vmulps zmm8, zmm8, zmm6
-    vmovaps zmm6, zmm8
-    ; ymm6 = [ sin(b*t3) | sin(b*t2) | sin(b*t1) | sin(b*t0) ]
-
+    V_COMPUTE_SINE zmm6                            ; zmm6 = [ sin(b*t3) | sin(b*t2) | sin(b*t1) | sin(b*t0) ]
     vmulps zmm6, zmm6, zmm1                        ; ymm6 = [ B*sin(b*t3) | B*sin(b*t2) | B*sin(b*t1) | B*sin(b*t0) ]
 
     vaddps zmm5, zmm5, zmm9                        ; x = A*sin(a*t+delta) + 0.5*Width
