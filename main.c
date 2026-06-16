@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
 
 
         clock_gettime(CLOCK_MONOTONIC, &start);
-        lissajousAVX(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta / (2.0f * M_PI));
+        lissajousAVX512(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta / (2.0f * M_PI));
         clock_gettime(CLOCK_MONOTONIC, &end);
         double lissajous_duration = end.tv_nsec - start.tv_nsec;
 
