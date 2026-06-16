@@ -10,8 +10,8 @@
 ; %1 - zmm register containing the input values (x)
 ; uses zmm7, zmm8 as temporary registers
 ; results are stored in %1
-    vmovaps zmm7, %1            ; x = ymm5
-    vmulps zmm7, zmm7, zmm7       ; x^2 = ymm7
+    vmovaps zmm7, %1                     ; x = ymm5
+    vmulps zmm7, zmm7, zmm7              ; x^2 = ymm7
     vmovaps zmm8, [c9]
     vmulps zmm8, zmm8, zmm7
     vaddps zmm8, zmm8, [c7]
@@ -70,22 +70,22 @@ lissajousAVX512:
     vbroadcastss zmm4, xmm4                 ; ymm4 = [ delta, delta, delta, delta | delta, delta, delta, delta ]
 
     vmovaps zmm5, [start]                   ; ymm5 <- [ t3 | t2 | t1 | t0 ], future [ x3 | x2 | x1 | x0 ]
-    vmovaps zmm6, zmm5                       ; ymm6 <- [ t3 | t2 | t1 | t0 ], future [ y3 | y2 | y1 | y0 ]
-    vmovaps zmm15, zmm5                      ; ymm15 <- [ curr_t | curr_t | curr_t | curr_t ] = [ t3 | t2 | t1 | t0 ]
-    vmovaps zmm14, [step_4x]                 ; ymm14 <- [ 0.004 | 0.004 | 0.004 | 0.004 ]
+    vmovaps zmm6, zmm5                      ; ymm6 <- [ t3 | t2 | t1 | t0 ], future [ y3 | y2 | y1 | y0 ]
+    vmovaps zmm15, zmm5                     ; ymm15 <- [ curr_t | curr_t | curr_t | curr_t ] = [ t3 | t2 | t1 | t0 ]
+    vmovaps zmm14, [step_4x]                ; ymm14 <- [ 0.004 | 0.004 | 0.004 | 0.004 ]
 
-    vcvtsi2ss xmm9, xmm9, esi                      ; ymm9 = [ 0 | 0 | 0 | Width ]
+    vcvtsi2ss xmm9, xmm9, esi               ; ymm9 = [ 0 | 0 | 0 | Width ]
     vbroadcastss zmm9, xmm9                 ; [ Width | Width | Width | Width ]
-    vmulps zmm9, zmm9, [half]                      ; ymm14 = [ 0.5*Width | 0.5*Width | 0.5*Width | 0.5*Width ]
+    vmulps zmm9, zmm9, [half]               ; ymm14 = [ 0.5*Width | 0.5*Width | 0.5*Width | 0.5*Width ]
 
-    vcvtsi2ss xmm10, xmm10, edx                     ; ymm15 = [ 0 | 0 | 0 | Height ]
+    vcvtsi2ss xmm10, xmm10, edx             ; ymm15 = [ 0 | 0 | 0 | Height ]
     vbroadcastss   xmm10, xmm10             ; [ Height | Height | Height | Height ]
-    vmulps    zmm10, zmm10, [half]                  ; ymm15 = [ 0.5*Height | 0.5*Height | 0.5*Height | 0.5*Height ]
+    vmulps    zmm10, zmm10, [half]          ; ymm15 = [ 0.5*Height | 0.5*Height | 0.5*Height | 0.5*Height ]
 
 mainloop:
     ; ================== compute x(t) ==================
-    vmulps zmm5, zmm5, zmm2                        ; ymm5 = [ a*t3 | a*t2 | a*t1 | a*t0 ]
-    vaddps zmm5, zmm5, zmm4                        ; ymm5 = [ a*t3+delta | a*t2+delta | a*t1+delta | a*t0+delta ]
+    vmulps zmm5, zmm5, zmm2                 ; ymm5 = [ a*t3 | a*t2 | a*t1 | a*t0 ]
+    vaddps zmm5, zmm5, zmm4                 ; ymm5 = [ a*t3+delta | a*t2+delta | a*t1+delta | a*t0+delta ]
 
     ; normalize z := a*t+delta for sine
     vmovaps zmm7, zmm5
@@ -93,22 +93,22 @@ mainloop:
     vsubps zmm5, zmm5, zmm7
 
 
-    V_COMPUTE_SINE zmm5                            ; ymm5 = [ sin(a*t3+delta) | sin(a*t2+delta) | sin(a*t1+delta) | sin(a*t0+delta) ]
-    vmulps zmm5, zmm5, zmm0                        ; ymm5 = [ A*sin(a*t3+delta) | A*sin(a*t2+delta) | A*sin(a*t1+delta) | A*sin(a*t0+delta) ]
+    V_COMPUTE_SINE zmm5                     ; ymm5 = [ sin(a*t3+delta) | sin(a*t2+delta) | sin(a*t1+delta) | sin(a*t0+delta) ]
+    vmulps zmm5, zmm5, zmm0                 ; ymm5 = [ A*sin(a*t3+delta) | A*sin(a*t2+delta) | A*sin(a*t1+delta) | A*sin(a*t0+delta) ]
 
     ; ================== compute y(t) ==================
-    vmulps zmm6, zmm6, zmm3                        ; ymm6 = [ b*t3 | b*t2 | b*t1 | b*t0 ]
+    vmulps zmm6, zmm6, zmm3                  ; ymm6 = [ b*t3 | b*t2 | b*t1 | b*t0 ]
 
     ; normalize z := b*t for sine
     vmovaps zmm7, zmm6
-    vrndscaleps zmm7, zmm7, 0x00                   ; Round Scale Packed Single-Precision Floating-Point Values
+    vrndscaleps zmm7, zmm7, 0x00             ; Round Scale Packed Single-Precision Floating-Point Values
     vsubps zmm6, zmm6, zmm7
 
-    V_COMPUTE_SINE zmm6                            ; zmm6 = [ sin(b*t3) | sin(b*t2) | sin(b*t1) | sin(b*t0) ]
-    vmulps zmm6, zmm6, zmm1                        ; ymm6 = [ B*sin(b*t3) | B*sin(b*t2) | B*sin(b*t1) | B*sin(b*t0) ]
+    V_COMPUTE_SINE zmm6                      ; zmm6 = [ sin(b*t3) | sin(b*t2) | sin(b*t1) | sin(b*t0) ]
+    vmulps zmm6, zmm6, zmm1                  ; ymm6 = [ B*sin(b*t3) | B*sin(b*t2) | B*sin(b*t1) | B*sin(b*t0) ]
 
-    vaddps zmm5, zmm5, zmm9                        ; x = A*sin(a*t+delta) + 0.5*Width
-    vaddps zmm6, zmm6, zmm10                       ; y = B*sin(b*t) + 0.5*Height
+    vaddps zmm5, zmm5, zmm9                   ; x = A*sin(a*t+delta) + 0.5*Width
+    vaddps zmm6, zmm6, zmm10                  ; y = B*sin(b*t) + 0.5*Height
 
     ; ================== draw points ==================
     vcvttps2dq zmm5, zmm5                    ; convert x to int
