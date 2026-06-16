@@ -4,12 +4,14 @@ section .data
     step_4x:    dd 0.00200, 0.00200, 0.00200, 0.00200, 0.00200, 0.00200, 0.00200, 0.00200   ; step = start[-1] - start[0]
     half:       dd 0.5,     0.5,     0.5,     0.5,     0.5,     0.5,     0.5,     0.5
 
-    ; minimax polynomial (sine approximation) coefficients
-    c1: dd  6.28318516,  6.28318516,  6.28318516,  6.28318516,  6.28318516,  6.28318516,  6.28318516,  6.28318516
-    c3: dd -41.3416550, -41.3416550, -41.3416550, -41.3416550, -41.3416550, -41.3416550, -41.3416550, -41.3416550
-    c5: dd  81.6010041,  81.6010041,  81.6010041,  81.6010041,  81.6010041,  81.6010041,  81.6010041,  81.6010041
-    c7: dd -76.5497823, -76.5497823, -76.5497823, -76.5497823, -76.5497823, -76.5497823, -76.5497823, -76.5497823
-    c9: dd  39.5367060,  39.5367060,  39.5367060,  39.5367060,  39.5367060,  39.5367060,  39.5367060,  39.5367060
+    ; minimax polynomial (sine approximation; abs. error minimized, degree 13) coefficients
+    c1:  dd   6.28318516,  6.28318516,  6.28318516,  6.28318516,  6.28318516,  6.28318516,  6.28318516,  6.28318516
+    c3:  dd -41.3416550, -41.3416550, -41.3416550, -41.3416550, -41.3416550, -41.3416550, -41.3416550, -41.3416550
+    c5:  dd  81.6010041,  81.6010041,  81.6010041,  81.6010041,  81.6010041,  81.6010041,  81.6010041,  81.6010041
+    c7:  dd -76.5497823, -76.5497823, -76.5497823, -76.5497823, -76.5497823, -76.5497823, -76.5497823, -76.5497823
+    c9:  dd  42.0579638,  42.0579638,  42.0579638,  42.0579638,  42.0579638,  42.0579638,  42.0579638,  42.0579638
+    c11: dd -15.0792949, -15.0792949, -15.0792949, -15.0792949, -15.0792949, -15.0792949, -15.0792949, -15.0792949
+    c13: dd   3.6550839,  3.6550839,   3.6550839,    3.6550839,   3.6550839,   3.6550839,   3.6550839,   3.6550839
 
 section .text
 DEFAULT REL
@@ -38,7 +40,7 @@ lissajousAVX:
     vmulps ymm9, ymm9, [half]                      ; ymm14 = [ 0.5*Width | 0.5*Width | 0.5*Width | 0.5*Width ]
 
     vcvtsi2ss xmm10, xmm10, edx                     ; ymm15 = [ 0 | 0 | 0 | Height ]
-    vbroadcastss   xmm10, xmm10             ; [ Height | Height | Height | Height ]
+    vbroadcastss   ymm10, xmm10             ; [ 0, 0, 0, 0 | 0, 0, 0, H ] -> [ H, H, H, H | H, H, H, H ]
     vmulps    ymm10, ymm10, [half]                  ; ymm15 = [ 0.5*Height | 0.5*Height | 0.5*Height | 0.5*Height ]
 
 mainloop:
@@ -54,7 +56,11 @@ mainloop:
     ; compute sine
     vmovaps ymm7, ymm5                       ; x = ymm5
     vmulps ymm7, ymm7, ymm7                        ; x^2 = ymm7
-    vmovaps ymm8, [c9]
+    vmovaps ymm8, [c13]             ; ymm8 = result of sine
+    vmulps ymm8, ymm8, ymm7
+    vaddps ymm8, ymm8, [c11]
+    vmulps ymm8, ymm8, ymm7
+    vaddps ymm8, ymm8, [c9]
     vmulps ymm8, ymm8, ymm7
     vaddps ymm8, ymm8, [c7]
     vmulps ymm8, ymm8, ymm7
@@ -81,7 +87,11 @@ mainloop:
     ; compute sine
     vmovaps ymm7, ymm6                       ; y = ymm6
     vmulps ymm7, ymm7, ymm7                        ; y^2 = ymm7
-    vmovaps ymm8, [c9]
+    vmovaps ymm8, [c13]             ; ymm8 = result of sine
+    vmulps ymm8, ymm8, ymm7
+    vaddps ymm8, ymm8, [c11]
+    vmulps ymm8, ymm8, ymm7
+    vaddps ymm8, ymm8, [c9]
     vmulps ymm8, ymm8, ymm7
     vaddps ymm8, ymm8, [c7]
     vmulps ymm8, ymm8, ymm7
@@ -102,6 +112,8 @@ mainloop:
     ; ====== draw points ======
     vcvttps2dq ymm5, ymm5                    ; convert x to int
     vcvttps2dq ymm6, ymm6                    ; convert y to int
+
+    ; 1 pixel
     vpextrd r8d, xmm5, 0                     ; r8d = x0
     vpextrd r9d, xmm6, 0                     ; r9d = y0
     mov eax, r9d                            ; y
@@ -109,6 +121,7 @@ mainloop:
     add eax, r8d                            ; y*width + x
     mov dword [rdi + 4*rax], 0xFFFFFFFF     ; set pixel (x0, y0) to white
 
+    ; 2 pixel
     vpextrd r8d, xmm5, 1                     ; r8d = x1
     vpextrd r9d, xmm6, 1                     ; r9d = y1
     mov eax, r9d
@@ -116,6 +129,7 @@ mainloop:
     add eax, r8d
     mov dword [rdi + 4*rax], 0xFFFFFFFF     ; set pixel (x0, y0) to white
 
+    ; 3 pixel
     vpextrd r8d, xmm5, 2                     ; r8d = x2
     vpextrd r9d, xmm6, 2                     ; r9d = y2
     mov eax, r9d
@@ -123,6 +137,7 @@ mainloop:
     add eax, r8d
     mov dword [rdi + 4*rax], 0xFFFFFFFF     ; set pixel (x0, y0) to white
 
+    ; 4 pixel
     vpextrd r8d, xmm5, 3                     ; r8d = x3
     vpextrd r9d, xmm6, 3                     ; r9d = y3
     mov eax, r9d
@@ -130,6 +145,40 @@ mainloop:
     add eax, r8d
     mov dword [rdi + 4*rax], 0xFFFFFFFF     ; set pixel (x0, y0) to white
 
+    vextractf128 xmm11, ymm5, 1             ; xmm11 = [ x7 | x6 | x5 | x4 ]
+    vextractf128 xmm12, ymm6, 1             ; xmm12 = [ y7 | y6 | y5 | y4 ]
+
+    ; 5 pixel
+    vpextrd r8d, xmm11, 0                   ; r8d = x4
+    vpextrd r9d, xmm12, 0                   ; r9d = y4
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF
+
+    ; 6 pixel
+    vpextrd r8d, xmm11, 1                   ; r8d = x5
+    vpextrd r9d, xmm12, 1                   ; r9d = y5
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF
+
+    ; 7 pixel
+    vpextrd r8d, xmm11, 2                   ; r8d = x6
+    vpextrd r9d, xmm12, 2                   ; r9d = y6
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF
+
+    ; 8 pixel
+    vpextrd r8d, xmm11, 3                   ; r8d = x7
+    vpextrd r9d, xmm12, 3                   ; r9d = y7
+    mov eax, r9d
+    imul eax, esi
+    add eax, r8d
+    mov dword [rdi + 4*rax], 0xFFFFFFFF
 
     ; ====== update t ======
     vaddps ymm15, ymm15, ymm14                      ; t += 0.004
