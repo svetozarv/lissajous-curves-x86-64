@@ -10,7 +10,7 @@ It's split in two main parts:
     - `x(t) = A * sin(a * t + δ/2π)`
     - `y(t) = B * sin(b * t)`
 
-It computes the coordinates (x, y) for every `dt = 0.00025` in `[0.0, 1.0]` using the sine function approximated by a 9th degree [minimax polynomial](https://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html), which coefficients were computed using the [Remez algorithm](https://www.boost.org/doc/libs/latest/libs/math/doc/html/math_toolkit/remez.html) and uses the SSE vector instructions, instead of x87 FPU, for performing 4 single-precision floating point calculations simultaneously to achieve better performance (which can be improved even more by using AVX/AVX-512).
+It computes the coordinates (x, y) for every `dt = 0.00025` in `[0.0, 1.0]` using the sine function approximated by a 9th degree [minimax polynomial](https://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html), which coefficients were computed using the [Remez algorithm](https://www.boost.org/doc/libs/latest/libs/math/doc/html/math_toolkit/remez.html) and uses the SSE vector instructions, instead of x87 FPU, for performing 4 single-precision floating point calculations simultaneously to achieve better performance (which can be improved even more by transitioning to AVX/AVX-512).
 
 The program is designed to run on Linux operating systems and follows the [Unix System V x86-64 ABI](https://gitlab.com/x86-psABIs/x86-64-ABI) for compatibility.
 

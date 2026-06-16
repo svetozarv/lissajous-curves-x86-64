@@ -51,10 +51,10 @@ int main(int argc, char* argv[]) {
             } else if (e.type == SDL_KEYDOWN) {
                 // Interactive parameter modification
                 switch (e.key.keysym.sym) {
-                    case SDLK_UP:    a += 0.1; break;
-                    case SDLK_DOWN:  a -= 0.1; break;
-                    case SDLK_RIGHT: b += 0.1; break;
-                    case SDLK_LEFT:  b -= 0.1; break;
+                    case SDLK_UP:    a += 1; break;
+                    case SDLK_DOWN:  a -= 1; break;
+                    case SDLK_RIGHT: b += 1; break;
+                    case SDLK_LEFT:  b -= 1; break;
                     case SDLK_w:     A += 1;   break;
                     case SDLK_s:     A -= 1;   break;
                     case SDLK_d:     B += 1;   break;
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
 
 
         clock_gettime(CLOCK_MONOTONIC, &start);
-        lissajous(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta / (2.0f * M_PI));
+        lissajousAVX(pixelBuffer, WIDTH, HEIGHT, A, B, a, b, delta / (2.0f * M_PI));
         clock_gettime(CLOCK_MONOTONIC, &end);
         double lissajous_duration = end.tv_nsec - start.tv_nsec;
 
